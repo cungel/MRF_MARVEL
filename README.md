@@ -41,11 +41,11 @@ pip install -r requirements.txt
   Lists all dependencies required to run the codebase.
 
 ## References
-* 1. Barrier, A., Coudert, T., Delphin, A., Lemasson, B. & Christen, T. MARVEL: MR Fingerprinting with Additional micRoVascular Estimates Using Bidirectional LSTMs. in Medical Image Computing and Computer Assisted Intervention – MICCAI 2024 (eds. Linguraru, M. G. et al.) vol. 15002 259–269 (Springer Nature Switzerland, Cham, 2024).
+* Barrier, A., Coudert, T., Delphin, A., Lemasson, B. & Christen, T. MARVEL: MR Fingerprinting with Additional micRoVascular Estimates Using Bidirectional LSTMs. in Medical Image Computing and Computer Assisted Intervention – MICCAI 2024.
 
-* 2. (ISMRM 2022) TensorFlow MRI: A Library for Modern Computational MRI on Heterogenous Systems. https://archive.ismrm.org/2022/2769.html.
+* TensorFlow MRI: A Library for Modern Computational MRI on Heterogenous Systems. Annual Meeting of ISMRM 2022. https://archive.ismrm.org/2022/2769.html.
 
-* 3. Ong, F., & Lustig, M. (2019). SigPy: A Python Package for High Performance Iterative Reconstruction. Proceedings of the 27th Annual Meeting of ISMRM, 4819.
+* Ong, F., & Lustig, M. (2019). SigPy: A Python Package for High Performance Iterative Reconstruction. Annual Meeting of ISMRM 2019.
 
 ## Contacts
 For questions, please contact: lila.cunge@gmail.com
