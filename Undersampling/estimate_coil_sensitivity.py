@@ -1,28 +1,30 @@
 import numpy as np
+from numpy.typing import NDArray
 import sys
 import os
 
 cg_sense_path = os.path.abspath(os.path.join(os.getcwd(), "CG-SENSE"))
 if cg_sense_path not in sys.path:
     sys.path.append(cg_sense_path)
+
 from cg_sense_new_version import * 
-
-
 import coil as calculate_coil_sens
 import CG_signal
 
-def estimate_sensitivity(kspace):
+def estimate_sensitivity(kspace: NDArray) -> NDArray:
     """
     Estimate the coil sensitivity maps from the k-space data.
-    
-    Parameters:
-    kspace (ndarray): The k-space data. Format : (n_coils, n_pulses , x, y)
-    coil_nb (int): The number of coils.
-    
-    Returns:
-    ndarray: The estimated coil sensitivity maps.
-    """
 
+    Parameters
+    ----------
+    kspace : NDArray
+        The k-space data. Format: (n_coils, n_pulses, x, y)
+
+    Returns
+    -------
+    NDArray
+        The estimated coil sensitivity maps.
+    """
     def filter_fn(x):
         return CG_signal.hann(2 * x)
     

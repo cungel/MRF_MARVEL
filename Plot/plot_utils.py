@@ -20,7 +20,7 @@ figure_color = 'white'
 
 # Load parameters units and limits from the JSON file in the Plot directory
 PARAMETER_DISPLAYED_LABELS, PARAMETER_UNITS, _, _, PARAMETER_LIMS_COLORMAP = load_parameter_names_units_limits(
-    os.path.dirname(__file__) + '/../..')
+    os.path.dirname(__file__) + '/..')
 
 # Set font settings for titles
 slice_title_kwargs = dict(fontsize=15, color=figure_color,

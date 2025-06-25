@@ -1,18 +1,29 @@
 import numpy as np
+from numpy.typing import NDArray
+from typing import Tuple, Union
 
-
-def cartesian_undersampling(RECO, percentage_undersampling, return_ksp=True):
+def cartesian_undersampling(RECO: NDArray,
+                            percentage_undersampling: float,
+                            return_ksp: bool = True
+                            ) -> Union[NDArray, Tuple[NDArray, NDArray]]:
     """
     Apply a cartesian undersampling mask to the data.
     
-    Args:
-        RECO (np.ndarray): The image to undersample of shape (x, y, z, t).
-        percentage_undersampling (float): Percentage of undersampling to apply.
-        return_ksp (bool): If True, returns the k-space undersampled data.
+    Parameters
+    ----------
+    RECO: NDArray
+        The image to undersample of shape (x, y, z, t).
+    percentage_undersampling: float
+        Percentage of undersampling to apply.
+    return_ksp: bool
+        If True, returns the k-space undersampled data.
     
-    Returns:
-        np.ndarray: The undersampled image in the spatial domain.
-        np.ndarray (optional): The k-space undersampled data if return_ksp is True.
+    Returns
+    -------
+    inverse_fft: NDArray
+        The undersampled image in the spatial domain.
+    k_space_undersampled: NDArray, optional
+        The k-space undersampled data if return_ksp is True.
     """
     k_space = np.fft.fftshift(np.fft.fft2(RECO, axes=(0,1)), axes=(0, 1))
     k_space_undersampled = k_space.copy()

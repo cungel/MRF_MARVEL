@@ -354,7 +354,7 @@ def _todict(matobj):
 
 # Parameter values
 
-def load_parameter_names_units_limits(path_to_MRF_stroke: str) -> Tuple[dict, dict, dict, dict, dict]:
+def load_parameter_names_units_limits(path_to_MRF_MARVEL: str) -> Tuple[dict, dict, dict, dict, dict]:
     """ 
     Load parameter limits and units. 
 
@@ -377,7 +377,7 @@ def load_parameter_names_units_limits(path_to_MRF_stroke: str) -> Tuple[dict, di
         Dictionary with parameter limits of the colormaps.
     """
     
-    PARAMETER_LIMS_UNITS = json.load(open(os.path.join(path_to_MRF_stroke, 'Reconstruction/Plot/parameter_limits_and_units.json')))
+    PARAMETER_LIMS_UNITS = json.load(open(os.path.join(path_to_MRF_MARVEL, 'Plot/parameter_limits_and_units.json')))
 
     PARAMETER_DISPLAYED_LABELS = PARAMETER_LIMS_UNITS['displayed_labels']
     PARAMETER_UNITS = PARAMETER_LIMS_UNITS['units']

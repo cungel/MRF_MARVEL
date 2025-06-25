@@ -242,9 +242,9 @@ for epoch in range(initial_epoch, n_epochs):
     X_train = DICO_signals_train
     
     NOISE_INFOS = TRAIN_INFOS["NOISE_INFOS"]
-    noise_type = NOISE_INFOS["type"]
-    if noise_type == "gaussian":
-        X_train = add_Gaussian_noise_to_DICO_complex(X_train, NOISE_INFOS['SNR'], NOISE_INFOS['SNR_type'])
+    SNR_phase = [5,20]
+    
+    X_train = add_Gaussian_noise_to_DICO_complex(X_train, NOISE_INFOS['SNR'], SNR_phase)
     
     X_train /= np.linalg.norm(X_train, axis=1, keepdims=True)
     X_train =  np.concatenate([np.abs(X_train),np.unwrap(np.angle(X_train))], axis=-1)

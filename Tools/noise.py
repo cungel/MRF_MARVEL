@@ -1,5 +1,4 @@
 import numpy as np
-
 from typing import List,Union
 from numpy.typing import NDArray
 
@@ -7,7 +6,23 @@ def add_Gaussian_noise_to_DICO(DICO_signals: NDArray[np.float64],
                                SNR: Union[float, List[float]],
                                SNR_type: str = 'poisson'
                                ) -> NDArray[np.float64]:
+    """
+    Add Gaussian noise to DICO signals (magnitude signals).
 
+    Parameters
+    ----------
+    DICO_signals : NDArray[np.float64]
+        The DICO signals.
+    SNR : Union[float, List[float]]
+        Signal-to-noise ratio for the magnitude.
+    SNR_type: str
+        Type of Signal-to-noise ratio distribution used
+
+    Returns
+    -------
+    NDArray[np.complex128]
+        The noisy DICO signals (complex).
+    """
     if SNR_type == 'poisson':
         SNR = np.random.poisson(SNR, DICO_signals.shape[0])[:, None]
         SNR[SNR == 0] = 1
@@ -23,7 +38,7 @@ def add_Gaussian_noise_to_DICO(DICO_signals: NDArray[np.float64],
 
 def add_Gaussian_noise_to_DICO_complex(DICO_signals: NDArray[np.complex128],
                                SNR: Union[float, List[float]],
-                               SNR_type: str = 'uniform'
+                               SNR_phase:Union[float, List[float]]        
                                ) -> NDArray[np.complex128]:
     """
     Add Gaussian noise to DICO signals (complex signals).
@@ -33,9 +48,9 @@ def add_Gaussian_noise_to_DICO_complex(DICO_signals: NDArray[np.complex128],
     DICO_signals : NDArray[np.complex128]
         The DICO signals (complex values).
     SNR : Union[float, List[float]]
-        Signal-to-noise ratio.
-    SNR_type : str, optional
-        NOT IMPLEMENTED.
+        Signal-to-noise ratio for the magnitude.
+    SNR_phase: Union[float, List[float]]
+        Signal-to-noise ratio for the phase.
 
     Returns
     -------
@@ -46,7 +61,7 @@ def add_Gaussian_noise_to_DICO_complex(DICO_signals: NDArray[np.complex128],
     phase = np.angle(DICO_signals)
 
     SNR_magnitude = SNR[0] + (SNR[1] - SNR[0]) * np.random.rand(DICO_signals.shape[0])[:, None]
-    SNR_phase = 5 + (20- 5) * np.random.rand(DICO_signals.shape[0])[:, None]
+    SNR_phase = SNR_phase[0] + (SNR_phase[1]- SNR_phase[0]) * np.random.rand(DICO_signals.shape[0])[:, None]
 
     noise = np.random.randn(*DICO_signals.shape)
     noise_magnitude = noise * np.mean(magnitude) / SNR_magnitude

@@ -5,7 +5,7 @@ from matplotlib.colors import LinearSegmentedColormap, Normalize
 from Tools.load_save_utils import load_parameter_names_units_limits
 
 # Load parameter units, and limits for colormaps from the JSON file in the Plot directory
-PARAMETER_LIMS_COLORMAP = load_parameter_names_units_limits(os.path.dirname(__file__) + '/../..')[-1]
+PARAMETER_LIMS_COLORMAP = load_parameter_names_units_limits(os.path.dirname(__file__) + '/..')[-1]
 
 # Define the parula colormap data
 parula_cm_data = [
