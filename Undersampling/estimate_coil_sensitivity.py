@@ -3,13 +3,13 @@ from numpy.typing import NDArray
 import sys
 import os
 
-cg_sense_path = os.path.abspath(os.path.join(os.getcwd(), "CG-SENSE"))
+cg_sense_path = os.path.abspath(os.path.join(os.getcwd(), "CG_SENSE"))
 if cg_sense_path not in sys.path:
     sys.path.append(cg_sense_path)
 
-from cg_sense_new_version import * 
-import coil as calculate_coil_sens
-import CG_signal
+from CG_SENSE.cg_sense_new_version import * 
+import CG_SENSE.coil as calculate_coil_sens
+import CG_SENSE.CG_signal as CG_signal
 
 def estimate_sensitivity(kspace: NDArray) -> NDArray:
     """

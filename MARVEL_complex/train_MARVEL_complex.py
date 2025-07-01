@@ -1,15 +1,11 @@
 import json
 import sys
 import os
-
 from itertools import chain
-
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
-
 from time import time
-
 import matplotlib.pyplot as plt
 
 sys.path.append(os.path.join(os.getcwd(), os.pardir))
@@ -19,25 +15,25 @@ from Tools.other_tools import print_time
 from Tools.reconstruction_utils import normalize_params
 from Tools.convol import compute_vasc_DICO_with_one_vascular_distribution
 from Tools.noise import add_Gaussian_noise_to_DICO_complex
-from Neural_Networks.networks_new import initialize_network
+from Neural_Networks.networks import initialize_network
 
 os.environ['TF_GPU_ALLOCATOR'] = 'cuda_malloc_async'
 
 gpus = tf.config.list_physical_devices('GPU')
 for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
-    
 
 seed = 42
 np.random.seed(seed) 
 
+# PATH TO THE DATABASE
 path_to_summer = os.path.join("/data_network/summer_projects", os.environ["USER"])
 if not os.path.ismount(path_to_summer):
     raise ValueError("SUMMER is not mounted.")
 
 path_to_summer_current = os.path.join(path_to_summer, "Current")
 
-
+# LOAD JSON FILE
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python train_network.py <training_infos.json>")
@@ -48,7 +44,6 @@ if __name__ == "__main__":
     saving_dir = os.path.dirname(sys.argv[1])
     saving_dir_fig = os.path.join(saving_dir, 'figures')
     os.makedirs(saving_dir_fig, exist_ok=True)
-
     saving_weights_dir = os.path.join(saving_dir, 'weights')
     os.makedirs(saving_weights_dir, exist_ok=True)
 
@@ -114,6 +109,7 @@ else:
 # LOAD VASCULAR DISTRIBUTIONS
 vasc_labels = TRAIN_INFOS['VASC_LABELS']
 vasc_mode = vasc_labels is not None
+
 if vasc_mode:
     start = time()
     print("\nLOAD VASCULAR DISTRIBUTIONS")
@@ -140,19 +136,19 @@ else:
 # INITIALIZE NETWORK
 start = time()
 print("\nINITIALIZE NETWORK")
+
 NETWORK_INFOS = TRAIN_INFOS["NETWORK_INFOS"]
 learned_labels = DICO_bloch_labels + vasc_labels
 n_parameters = len(learned_labels)
 layer_B1_constraint_incorporation = NETWORK_INFOS["incorporate_B1_constraint"]
-
-network_name = 'BiLSTM_complex'
+network_name = NETWORK_INFOS["network_name"]
 input_size = n_pulses + (layer_B1_constraint_incorporation == 0)
 layer_shapes = [input_size] + NETWORK_INFOS["hidden_layer_shapes"] + [n_parameters]
 activations = NETWORK_INFOS["activations"]
 
-
 NN = initialize_network(network_name, layer_shapes, activations, layer_B1_constraint_incorporation)
 
+# LOAD WEIGHTS FROM MAGNITUDE MODEL
 training_path_mag  = os.path.join(path_to_summer_current, '2023_MRF_Collab/Lila/MARVEL_training/DICO8/train_updated_code_v2_LR0.9')
 RECOS_INFOS_mag  = json.load(open(os.path.join(training_path_mag , 'training_infos.json')))
 n_epochs_mag  = 87
@@ -165,11 +161,7 @@ load_model_weights(model_mag, [260,50,75,50,6], adding_text='_{}epochs'.format(n
 
 NN.get_layer("bidirectional").set_weights(model_mag.get_layer("bidirectional_2").get_weights())
 NN.get_layer("bidirectional").trainable = True
-'''
-NN.get_layer("dense").set_weights(model_mag.get_layer("dense_3").get_weights())
-NN.get_layer("dense_1").set_weights(model_mag.get_layer("dense_4").get_weights())
-NN.get_layer("dense_2").set_weights(model_mag.get_layer("dense_5").get_weights())
-'''
+
 # Load previous training weights
 initial_epoch = NETWORK_INFOS["initial_weights_epoch"]
 if initial_epoch is not None:
@@ -211,12 +203,10 @@ if test_data:
     if vasc_mode:
         keeped_df = 30
         Y_test, X_test = compute_vasc_DICO_with_one_vascular_distribution(DICO_bloch_params_test, DICO_bloch_signals_test, distrib_DICO_parameters, distrib_DICO_coefs, id_df=id_df, keeped_df=keeped_df)
-        
         df_min, df_max = min(DICO_B1_params_test), max(DICO_B1_params_test)
         B1_test = DICO_B1_params_test[(-keeped_df <= DICO_B1_params_test) * (DICO_B1_params_test <= keeped_df)]
     else:
         Y_test, X_test = DICO_bloch_params_test, DICO_bloch_signals_test
-
    
     X_test /= np.linalg.norm(X_test, axis=1, keepdims=True)
     X_test =  np.concatenate([np.abs(X_test), np.unwrap(np.angle(X_test))], axis=-1)
@@ -251,9 +241,11 @@ for epoch in range(initial_epoch, n_epochs):
  
     if layer_B1_constraint_incorporation is not None:
         X_train = [X_train, B1_train]
+
     Y_train = normalize_params(DICO_params_train, learned_labels)
     
     history = NN.fit(X_train, Y_train, validation_data=validation_data, batch_size=64, shuffle=False, epochs=1)
+
     lst_loss.append(history.history['loss'][0])
     np.save(saving_dir_fig + '/lst_loss.npy', lst_loss)
     if test_data:
@@ -281,5 +273,6 @@ for epoch in range(initial_epoch, n_epochs):
         pass
 
     learning_rate *= decrease_LR
+    
     NN.compile(optimizer=Adam(learning_rate=learning_rate), loss='mse', metrics=[tf.keras.metrics.MeanSquaredError()])
 

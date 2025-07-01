@@ -1,17 +1,11 @@
 import json
 import sys
 import os
-
 from itertools import chain
-
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
-
 from time import time
-
-import typing
-
 import matplotlib.pyplot as plt
 
 from Tools.load_save_utils import load_matlab_dictionary, load_hdf5_dictionary, remove_parameters_from_dictionary, load_model_weights, save_model_weights, load_distrib_DICO_from_directory, load_distrib_DICO_from_mat
@@ -21,12 +15,14 @@ from Tools.convol import compute_vasc_DICO_with_one_vascular_distribution
 from Tools.noise import add_Gaussian_noise_to_DICO
 from Neural_Networks.networks import initialize_network
 
+# PATH TO THE DATABASE
 path_to_summer = os.path.join("/data_network/summer_projects", os.environ["USER"])
 if not os.path.ismount(path_to_summer):
     raise ValueError("SUMMER is not mounted.")
 
 path_to_summer_current = os.path.join(path_to_summer, "Current")
 
+# LOAD JSON 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python train_network.py <training_infos.json>")
@@ -37,7 +33,6 @@ if __name__ == "__main__":
     saving_dir = os.path.dirname(sys.argv[1])
     saving_dir_fig = os.path.join(saving_dir, 'figures')
     os.makedirs(saving_dir_fig, exist_ok=True)
-
     saving_weights_dir = os.path.join(saving_dir, 'weights')
     os.makedirs(saving_weights_dir, exist_ok=True)
 
@@ -45,7 +40,9 @@ if __name__ == "__main__":
 start = time()
 print("LOAD BLOCH DICTIONARY")
 path_to_dico = os.path.join(path_to_summer_current, TRAIN_INFOS['DICO_DIR_SUMMER'])
+
 load_mode = 'mat'
+
 if load_mode == 'mat':
     DICO_bloch_params, DICO_bloch_signals, DICO_bloch_labels = load_matlab_dictionary(os.path.join(path_to_dico, 'DICO.mat'), nb_indents=1)
 if load_mode == 'h5':
@@ -127,13 +124,14 @@ else:
 
 # INITIALIZE NETWORK
 start = time()
+
 print("\nINITIALIZE NETWORK")
+
 NETWORK_INFOS = TRAIN_INFOS["NETWORK_INFOS"]
 learned_labels = DICO_bloch_labels + vasc_labels
 n_parameters = len(learned_labels)
 layer_B1_constraint_incorporation = NETWORK_INFOS["incorporate_B1_constraint"]
-
-network_name = 'BiLSTM_complex'
+network_name = NETWORK_INFOS["network_name"]
 input_size = n_pulses + (layer_B1_constraint_incorporation == 0)
 layer_shapes = [input_size] + NETWORK_INFOS["hidden_layer_shapes"] + [n_parameters]
 activations = NETWORK_INFOS["activations"]
@@ -209,12 +207,15 @@ for epoch in range(initial_epoch, n_epochs):
 
     NOISE_INFOS = TRAIN_INFOS["NOISE_INFOS"]
     noise_type = NOISE_INFOS["type"]
+    
     if noise_type == "gaussian":
         X_train = add_Gaussian_noise_to_DICO(X_train, NOISE_INFOS['SNR'], NOISE_INFOS['SNR_type'])
 
     X_train /= np.linalg.norm(X_train, axis=1, keepdims=True)
+    
     if layer_B1_constraint_incorporation is not None:
         X_train = [X_train, B1_train]
+    
     Y_train = normalize_params(DICO_params_train, learned_labels)
     
     history = NN.fit(X_train, Y_train, validation_data=validation_data, batch_size=64, shuffle=True, epochs=1)
@@ -239,11 +240,13 @@ for epoch in range(initial_epoch, n_epochs):
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
     plt.xlim(0, epoch+1)
+    
     try:
         plt.savefig(saving_dir_fig + '/loss_evol.png', dpi=300)
     except Exception:
         pass
 
     learning_rate *= decrease_LR
+    
     NN.compile(optimizer=Adam(learning_rate=learning_rate), loss='mse', metrics=[tf.keras.metrics.MeanSquaredError()])
 
